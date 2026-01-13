@@ -3,8 +3,8 @@ name: CI - Angular
 on:
   pull_request:
   push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
+    branches: ["main"]
+    tags: ["v*"]
 
 jobs:
   build:
@@ -28,3 +28,9 @@ jobs:
 
       - name: Build
         run: npm run build
+        # ✅ เก็บไฟล์ build เป็น artifact ไว้ใช้ต่อ (เช่น deploy Azure ภายหลัง)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/
