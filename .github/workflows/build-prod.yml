@@ -19,4 +19,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: angular-prod-dist
-          path: dist/my-app/browser
+          path: dist/my-app
