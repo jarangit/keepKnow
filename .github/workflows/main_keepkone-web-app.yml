@@ -1,0 +1,60 @@
+name: Build and deploy Angular to Azure Web App - keepKone-web-app
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install & Build (prod)
+        run: |
+          npm ci
+          npm run build -- --configuration production
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist/my-app/browser
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web-dist
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_433C1E3AB3F544A6BF0038ECA3C63D22 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E6E2F3408D8E4CBDA9716BE94A5650C7 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F4EC7FA144BD4795AF16F2960902C8E7 }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'keepKone-web-app'
+          slot-name: 'Production'
+          package: web-dist
